@@ -33,6 +33,8 @@ name: u.name ,
 surname: u.surname,
 structure: u.structure,
 mail: u.email,
+mailValid:u.mailValid,
+role:u.role,
 objectclass: 'eoleUser'
 }
 };
