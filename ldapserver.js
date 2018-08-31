@@ -25,10 +25,10 @@ function authorize(req, res, next) {
 
 function toLdap(u) {
 var r={
-dn: 'cn='+u.uid+','+SUFFIX,
+dn: 'cn='+u.uid.toLowerCase()+','+SUFFIX,
 attributes: {
-cn: u.uid,
-uid: u.uid,
+cn: u.uid.toLowerCase(),
+uid: u.uid.toLowerCase(),
 name: u.name ,
 surname: u.surname,
 structure: u.structure,
