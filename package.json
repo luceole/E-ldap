@@ -5,7 +5,8 @@
   "dependencies": {
     "crypto": "0.0.3",
     "ldapjs": "^1.0.1",
-    "mongoose": "^4.8.1"
+    "connect-mongo": "^1.2.1",
+    "mongoose": "^4.13.9"
   },
   "devDependencies": {},
   "engines": {

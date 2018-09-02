@@ -8,7 +8,15 @@ var parseFilter = require('ldapjs').parseFilter;
 var User =  require('./api/user/user.model.js');
 
 // Connect to database
+
+// Connect to MongoDB
 mongoose.connect(config.mongo.uri, config.mongo.options);
+mongoose.connection.on('error', function(err) {
+  console.error(`MongoDB connection error: ${err}`);
+  process.exit(-1); 
+});
+
+
 
 var SUFFIX='dc=eole';
 var ldapUsers = {};
@@ -28,7 +36,7 @@ var r={
 dn: 'cn='+u.uid.toLowerCase()+','+SUFFIX,
 attributes: {
 cn: u.uid.toLowerCase(),
-uid: u.uid.toLowerCase(),
+uid: u.uid,
 name: u.name ,
 surname: u.surname,
 structure: u.structure,
