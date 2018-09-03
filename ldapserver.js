@@ -37,6 +37,7 @@ dn: 'cn='+u.uid.toLowerCase()+','+SUFFIX,
 attributes: {
 cn: u.uid.toLowerCase(),
 uid: u.uid,
+uuid: u.uid.toLowerCase(),
 name: u.name ,
 surname: u.surname,
 structure: u.structure,
@@ -51,7 +52,7 @@ return(r);
 
 var server = ldap.createServer();
 
-server.listen(1389, function() {
+server.listen(config.port, function() {
 console.log("Ldap Server Started %s", server.url)
 });
 
