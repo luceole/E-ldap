@@ -1,10 +1,12 @@
 # Conteneur E-LDAP  en mode Production
-FROM  node:slim
+FROM mhart/alpine-node:6
+RUN apk add --no-cache vim
+
+#FROM  node:slim
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY .  /usr/src/app
 
-EXPOSE 1389
-ENTRYPOINT [ "npm" ]
-CMD [ "start" ]
+EXPOSE 389
+CMD [ "npm", "start" ]
 
