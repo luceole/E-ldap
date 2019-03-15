@@ -6,21 +6,23 @@ var config = require('./config/local.env');
 var ldap = require('ldapjs');
 var parseFilter = require('ldapjs').parseFilter;
 var User =  require('./api/user/user.model.js');
+var Group =  require('./api/group/group.model.js');
 
 // Connect to database
 
 // Connect to MongoDB
 mongoose.connect(config.mongo.uri, config.mongo.options);
+console.log(config.mongo.uri)
 mongoose.connection.on('error', function(err) {
   console.error(`MongoDB connection error: ${err}`);
-  process.exit(-1); 
+  process.exit(-1);
 });
 
 
 
 var SUFFIX='dc=eole';
 var ldapUsers = {};
-var query=User.find({isactif: true}); //  Fonction de lecture des  actifs
+var query=User.find({isactif: true}).populate('memberOf', 'name') //  Fonction de lecture des  actifs
 
 
 function authorize(req, res, next) {
@@ -32,6 +34,11 @@ function authorize(req, res, next) {
 }
 
 function toLdap(u) {
+  var memberof=[]
+  for( var i = 0; i< u.memberOf.length; i++)
+  {
+   memberof[i]= u.memberOf[i].name;
+  }
 var r={
 dn: 'cn='+u.uid.toLowerCase()+','+SUFFIX,
 attributes: {
@@ -44,7 +51,10 @@ structure: u.structure,
 mail: u.email,
 mailValid:u.mailValid,
 role:u.role,
-objectclass: 'eoleUser'
+memberof: memberof,
+adminof: u.adminOf.toString(),
+objectclass: 'eoleUser',
+createtimestamp: Date.now() - 10,
 }
 };
 return(r);
@@ -60,8 +70,9 @@ console.log("Ldap Server Started %s", server.url)
 server.bind(SUFFIX, function(req, res, next) {
 var dn=req.dn.toString();
 var uid=dn.split(",")[0].split("=")[1];
-User.findOne({uid: uid}, function(err,u) {
 
+User.findOne({uid: uid}, function(err,u) {
+//  console.log(u)
   if (err) console.log("****"+err);
   if (!u)    return next(new ldap.NoSuchObjectError(dn));
   if (!u.authenticate( req.credentials)) {
@@ -76,20 +87,19 @@ User.findOne({uid: uid}, function(err,u) {
 // LDAPSEARCH
 server.search(SUFFIX, authorize,   function(req, res, next) {
   var dn = req.dn.toString();
-  var filter=parseFilter(req.filter.toString());
+// console.log("dn:"+dn)
+ var filter=parseFilter(req.filter.toString());
+//  console.log(req.filter)
   query.exec(function(err,users) {
   var user = {};
   if (err) console.log(err);
         for( var i = 0; i< users.length; i++)
         {
          user= toLdap(users[i]);
-         if (req.filter.matches(user.attributes))
+         if (filter.matches(user.attributes))
          res.send(user);
         }
    res.end();
    return next();
    });
 }); // Fin Search
-
-
-
